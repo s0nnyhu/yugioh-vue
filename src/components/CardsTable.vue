@@ -1,7 +1,13 @@
 <template>
     <div class="filter">
-        <label for="search">Search :</label>
-        <input id="search" type="text" v-model="inputSearch" @change="search" />
+        <label for="search">Search (set, name, rarity) :</label>
+        <input
+            id="input-search"
+            type="text"
+            v-model="inputSearch"
+            @change="search"
+            placeholder="Type any set, name or rarity"
+        />
     </div>
     <p v-if="error">{{ error }}</p>
     <p v-if="loading">Loading...</p>
@@ -76,6 +82,10 @@ function getTotalPriceByQuantity(quantity, price) {
 </script>
 
 <style>
+#input-search {
+    width: 10%;
+}
+
 #cards-table {
     margin: 1% 0 2% 0;
 }
