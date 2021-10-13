@@ -3,18 +3,21 @@
         <label for="search">
             Search (
             <span
+                class="help-cursor"
                 data-label="set"
                 @mouseover="highlightTableColumn"
                 @mouseleave="highlightTableColumn"
                 alt="Card Set"
             >set</span>,
             <span
+                class="help-cursor"
                 data-label="name"
                 @mouseover="highlightTableColumn"
                 @mouseleave="highlightTableColumn"
                 alt="Card Name"
             >name</span>,
             <span
+                class="help-cursor"
                 data-label="rarity"
                 @mouseover="highlightTableColumn"
                 @mouseleave="highlightTableColumn"
@@ -40,8 +43,8 @@
                     <th>Language</th>
                     <th>ID</th>
                     <th class="th-name">Name</th>
-                    <th>Rarity</th>
-                    <th class="th-rarity">Quantity</th>
+                    <th class="th-rarity">Rarity</th>
+                    <th>Quantity</th>
                     <th>Edition</th>
                     <th v-show="showPrice">Unique Price</th>
                     <th v-show="showPrice">Total Price</th>
@@ -53,11 +56,23 @@
                     <td>{{ card.card_set }}</td>
                     <td>{{ card.language }}</td>
                     <td>{{ card.card_id }}</td>
-                    <td>{{ card.card_name }}</td>
+
+                    <td
+                        class="help-cursor"
+                        v-tooltip="{
+                            content: () => asyncGetImg(card),
+                            html: true,
+                            trigger: 'click',
+                            placement: 'bottom-start',
+                            loadingContent: '<i>Loading...</i>',
+                        }"
+                    >{{ card.card_name }}</td>
+
                     <td>{{ card.rarity }}</td>
                     <td>{{ card.quantity }}</td>
                     <td>{{ card.card_edition }}</td>
                     <td v-show="showPrice">{{ card.cardmarket_price }} €</td>
+
                     <td
                         v-show="showPrice"
                     >{{ getTotalPriceByQuantity(card.quantity, card.cardmarket_price) }} €</td>
@@ -90,6 +105,12 @@ onMounted(() => {
         }
     });
 })
+
+async function asyncGetImg(params) {
+    const response = await fetch("https://db.ygoprodeck.com/api/v7/cardinfo.php?name=" + params.card_name)
+    const cardData = await response.json()
+    return `<img src="${cardData.data[0]['card_images'][0].image_url}">`
+}
 
 function search() {
     cards.value = CARDS.value;
@@ -150,7 +171,7 @@ th {
     }
 }
 
-span[data-label] {
+.help-cursor {
     cursor: help;
 }
 </style>
