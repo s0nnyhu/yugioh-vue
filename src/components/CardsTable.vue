@@ -1,6 +1,26 @@
 <template>
     <div class="filter">
-        <label for="search">Search (set, name, rarity) :</label>
+        <label for="search">
+            Search (
+            <span
+                data-label="set"
+                @mouseover="highlightTableColumn"
+                @mouseleave="highlightTableColumn"
+                alt="Card Set"
+            >set</span>,
+            <span
+                data-label="name"
+                @mouseover="highlightTableColumn"
+                @mouseleave="highlightTableColumn"
+                alt="Card Name"
+            >name</span>,
+            <span
+                data-label="rarity"
+                @mouseover="highlightTableColumn"
+                @mouseleave="highlightTableColumn"
+                alt="Card Rarity"
+            >rarity</span>) :
+        </label>
         <input
             id="input-search"
             type="text"
@@ -15,16 +35,16 @@
         <table v-if="!loading && !error">
             <thead>
                 <tr>
-                    <th>Year</th>
-                    <th>Set</th>
+                    <th class="th-year">Year</th>
+                    <th class="th-set">Set</th>
                     <th>Language</th>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th class="th-name">Name</th>
                     <th>Rarity</th>
-                    <th>Quantity</th>
+                    <th class="th-rarity">Quantity</th>
                     <th>Edition</th>
-                    <th>Unique Price</th>
-                    <th>Total Price</th>
+                    <th v-show="showPrice">Unique Price</th>
+                    <th v-show="showPrice">Total Price</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,8 +57,10 @@
                     <td>{{ card.rarity }}</td>
                     <td>{{ card.quantity }}</td>
                     <td>{{ card.card_edition }}</td>
-                    <td>{{ card.cardmarket_price }} €</td>
-                    <td>{{ getTotalPriceByQuantity(card.quantity, card.cardmarket_price) }} €</td>
+                    <td v-show="showPrice">{{ card.cardmarket_price }} €</td>
+                    <td
+                        v-show="showPrice"
+                    >{{ getTotalPriceByQuantity(card.quantity, card.cardmarket_price) }} €</td>
                 </tr>
             </tbody>
         </table>
@@ -51,6 +73,7 @@ import { useFetch } from '../hooks/fetcher';
 
 const apiUrl = ref("https://raw.githubusercontent.com/s0nnyhu/yugioh/develop/data.json");
 const inputSearch = ref("")
+const showPrice = ref(false)
 let {
     loading,
     error,
@@ -61,7 +84,11 @@ let {
 
 onMounted(() => {
     fetchCards();
-    console.log("Hello there");
+    window.addEventListener("keydown", e => {
+        if (e.altKey && e.key === "p") {
+            showPrice.value = !showPrice.value;
+        }
+    });
 })
 
 function search() {
@@ -74,6 +101,16 @@ function search() {
         );
     });
 
+}
+
+function highlightTableColumn(e) {
+    let searchTarget = e.target.dataset.label
+    let columnHead = document.querySelector(`.th-${searchTarget}`)
+    if (e.type == "mouseover") {
+        columnHead.classList.add('blink')
+    } else {
+        columnHead.classList.remove('blink')
+    }
 }
 
 function getTotalPriceByQuantity(quantity, price) {
@@ -99,5 +136,21 @@ th {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
+}
+
+.blink {
+    animation: blink 0.5s linear infinite;
+}
+@keyframes blink {
+    from {
+        background-color: rgba(139, 0, 0, 0.8);
+    }
+    to {
+        background-color: rgba(155, 6, 6, 0.8);
+    }
+}
+
+span[data-label] {
+    cursor: help;
 }
 </style>
